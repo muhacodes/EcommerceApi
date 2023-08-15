@@ -42,9 +42,7 @@ class ProductController extends Controller
             return $product;
         });
 
-        return response()->json([
-            'products' => $products
-        ], 200);
+        return response()->json($products, 200);
     }
 
     /**
@@ -126,7 +124,7 @@ class ProductController extends Controller
             $product->photo = $product->photo ? url('storage/' . $product->photo) : null;
             $product->photo1 = $product->photo1 ? url('storage/' . $product->photo1) : null;
         
-            return response()->json(['product' => $product], 200);
+            return response()->json($product, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Product not found'], 404);
         }
@@ -148,7 +146,7 @@ class ProductController extends Controller
                 return $product;
             });
         
-            return response()->json(['products' => $transformedProducts], 200);
+            return response()->json($transformedProducts, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Category not found'], 404);
         }

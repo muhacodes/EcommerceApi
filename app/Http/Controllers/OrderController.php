@@ -22,7 +22,7 @@ class OrderController extends Controller
     {
         $orders = Order::with('orderProducts.product')->get();
 
-        return response()->json(['Orders' => $orders], 200);
+        return response()->json($orders, 200);
 
     }
 
@@ -91,8 +91,6 @@ class OrderController extends Controller
             'message' => 'Order created successfully',
             'order' => $order
         ], 201);
-        
-        
         
     }
 

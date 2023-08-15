@@ -20,7 +20,9 @@ class CategoryController extends Controller
     {
         $categories = Category::all();
 
-        return response()->json(['categories' => $categories], 200);
+        // If you want to have 
+        // return response()->json(['categories' => $categories], 200);
+        return response()->json($categories, 200);
     }
 
     /**
@@ -58,7 +60,7 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
-            return response()->json(['category' => $category], 200);
+            return response()->json($category, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Category not found'], 404);
         }
@@ -70,7 +72,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:categories|max:50|min:5',
+            'name' => 'required|unique:categories|max:50|min:3',
             // Add any other validation rules for the category fields
         ]);
 
