@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\OrderProductResource;
 
 
 class OrderController extends Controller
@@ -20,9 +22,18 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $orders = Order::with('orderProducts.product')->get();
+        
+        
+        // $orders = OrderProduct::with('product')->get();
 
+        // return response()->json($orders, 200);
+
+        // Full details of orderproducts and each products variations, can be customized though. 
+        $orders = OrderProductResource::collection(OrderProduct::with('product')->get());
         return response()->json($orders, 200);
+
+        // $orders = OrderResource::collection(Order::with('orderProducts')->get()); // Assuming you have a relationship named orderProducts
+        // return response()->json($orders);
 
     }
 
@@ -44,13 +55,17 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
+        
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'address' => 'required|max:255',
             'email' => 'required|email|max:255',
             'tel' => 'required|max:255',
             'products' => 'required|array', // Ensure products is an array
-            'products.*' => 'required|exists:products,id', // Validate each product_id
+            'products.*' => 'required|array', // Each product item must be an array
+            'products.*.id' => 'required|exists:products,id', // Validate product_id within each product
+            'products.*.quantity' => 'required|integer|min:1', // Validate quantity  // Validate each product_id
         ]);
         
         if ($validator->fails()) {
@@ -59,28 +74,32 @@ class OrderController extends Controller
             ], 422);
         }
         
+
         $order = new Order;
         $order->name = $request->input('name');
         $order->address = $request->input('address');
         $order->email = $request->input('email');
         $order->tel = $request->input('tel');
+        $quantity = $request->input('quantity');
         $order->save();
         
         $products = $request->input('products');
         $orderProducts = [];
         
-        foreach ($products as $productId) {
-            $product = Product::find($productId);
+        foreach ($products as $productData) {
+            $product = Product::find($productData['id']);
             if (!$product) {
                 return response()->json([
-                    'errors' => 'Invalid product ID: ' . $productId
+                    'errors' => 'Invalid product ID: ' . $productData['id']
                 ], 422);
             }
         
             $orderProduct = new OrderProduct;
             $orderProduct->order_id = $order->id;
             $orderProduct->product_id = $product->id;
-            $orderProduct->quantity = 1; // Assuming a quantity of 1 for each product
+            $orderProduct->quantity = $productData['quantity']; // Assuming a quantity of 1 for each product
+            $orderProduct->color = $productData['color'];
+            $orderProduct->size = $productData['size'];
             $orderProduct->save();
             $orderProducts[] = $orderProduct;
         }

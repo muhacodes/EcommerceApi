@@ -23,25 +23,25 @@ class Product extends Model
         'photo1',
     ];
     
+   
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    public function sizes()
+    public function variations()
     {
-        return $this->belongsToMany(Size::class, 'product_size');
+        return $this->hasMany(ProductVariation::class);
     }
+    
 
     public function orders()
     {
         return $this->belongsToMany(Order::class, 'order_product')->withPivot('quantity');
     }
 
-    public function colors()
-    {
-        return $this->belongsToMany(Color::class, 'product_color');
-    }
+    
 
     public function getPhotoUrlAttribute()
     {

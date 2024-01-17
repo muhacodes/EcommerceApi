@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 use App\Models\category;
 use App\Models\Product;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
@@ -19,7 +21,15 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
+
+        // $products = Product::all();
+        // $products->transform(function ($product) {
+        //     $product->photo = $product->photo ? Storage::disk('public')->url($product->photo) : null;
+        //     // $product->photo1 = $product->photo1 ? Storage::disk('public')->url($product->photo1) : null;
+        //     return $product;
+        // });
+
+        // return response()->json($products    , 200);
 
         // Transform the products to include image URLs
         // $products->transform(function ($product) {
@@ -31,18 +41,36 @@ class ProductController extends Controller
         // return response()->json([
         //     'products' => $products
         // ], 200);
+        // $product = Product::with('variations')->get();
 
+        // $productData = new ProductVariationResource($product);
+        
+    
+        // return response()->json($productData, 200);
 
         $products = Product::all();
+        $productCollection = ProductResource::collection($products);
 
-        // Transform the products to include image URLs
-        $products->transform(function ($product) {
-            $product->photo = $product->photo ? url('storage/' . $product->photo) : null;
-            $product->photo1 = $product->photo1 ? url('storage/' . $product->photo1) : null;
-            return $product;
-        });
+        return response()->json($productCollection, 200);
 
-        return response()->json($products, 200);
+        // $products->transform(function ($product) {
+        //     $product->photo_url = $product->photo ? url('storage/' . $product->photo) : null;
+        //     $product->photo1_url = $product->photo1 ? url('storage/' . $product->photo1) : null;
+        //     return $product;
+        // });
+
+        // return ProductResource::collection($products);
+
+
+        // $products =  Product::with('variations')->get();
+        // $productData = ProductVariationResource($products);
+        // // $products->transform(function ($product) {
+        // //     $product->photo = $product->photo ? url('storage/' . $product->photo) : null;
+        // //     $product->photo1 = $product->photo1 ? url('storage/' . $product->photo1) : null;
+        // //     return $product;
+        // // });
+
+        // return response()->json($productData    , 200);
     }
 
     /**
@@ -69,7 +97,7 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'size' => 'nullable|max:255',
-            'photo' => 'nullable|image|max:2048',
+            'photo' => 'required|image|max:2048',
             'photo1' => 'nullable|image|max:2048',
             'description' => 'nullable',
             'information' => 'nullable',
@@ -118,11 +146,19 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::findOrFail($id);
+            // $product = Product::with('sizes')->findOrFail($id);
         
-            // Transform the product to include image URLs
-            $product->photo = $product->photo ? url('storage/' . $product->photo) : null;
-            $product->photo1 = $product->photo1 ? url('storage/' . $product->photo1) : null;
+            // // Transform the product to include image URLs
+            // $product->photo = $product->photo ? url('storage/' . $product->photo) : null;
+            // $product->photo1 = $product->photo1 ? url('storage/' . $product->photo1) : null;
+
+            // $products = Product::all();
+            // $productCollection = ProductResource::collection($products);
+    
+            // return response()->json($productCollection, 200);
+            $products = Product::findOrFail($id);
+            $product  = new ProductResource($products);
+            return response()->json($product, 200);
         
             return response()->json($product, 200);
         } catch (ModelNotFoundException $e) {
@@ -177,10 +213,10 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
     
             // Validate the request data
-            // $validator = Validator::make($request->all(), [
-            //     // 'name' => 'required|unique:categories|max:50|min:5',
-            //     // Add any other validation rules for the category fields
-            // ]);
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|unique:categories|max:50|min:5',
+                // Add any other validation rules for the category fields
+            ]);
     
             // if ($validator->fails()) {
             //     return response()->json(['error' => $validator->errors()], 400);

@@ -9,8 +9,8 @@ class Color extends Model
 {
     use HasFactory;
 
-    public function products()
+    public function variations()
     {
-        return $this->belongsToMany(Product::class, 'product_color');
+        return $this->hasMany(ProductVariation::class);
     }
 }

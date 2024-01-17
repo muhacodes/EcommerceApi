@@ -13,28 +13,20 @@ class CreateProductsTable extends Migration
      */
     public function up()
     {
+        
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('name');
+            $table->unsignedBigInteger('category_id');
             $table->decimal('price', 8, 2);
             $table->integer('quantity');
-            $table->string('size')->nullable();
             $table->string('photo')->nullable();
             $table->string('photo1')->nullable();
+            $table->string('phot2')->nullable();
             $table->text('description')->nullable();
-            $table->text('information')->nullable();
             $table->timestamps();
-        });
 
-        Schema::create('colors', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-        });
-
-        Schema::create('product_color', function (Blueprint $table) {
-            $table->foreignId('product_id')->constrained('products', 'id')->onDelete('cascade');
-            $table->foreignId('color_id')->constrained('colors', 'id')->onDelete('cascade');
+            $table->foreign('category_id')->references('id')->on('categories');
         });
     }
 
